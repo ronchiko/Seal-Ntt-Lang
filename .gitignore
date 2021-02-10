@@ -6,5 +6,7 @@
 *.a
 *.log
 ntt
+*.ntt
 
+.vscode/*
 .vscode

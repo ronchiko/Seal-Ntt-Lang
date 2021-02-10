@@ -61,9 +61,13 @@ int SealNtt_NewFunc(const char* name, SealNtt_Function);
  */
 int SealNtt_Load(FILE* stream, void* ntt, Seal_NttHandler handler);
 
+extern const char* SEAL_NTT_FUNCTION;
+
 // ntte.c file
 
-void SealNtt_RaiseError(SealNtt_Error error);
+#define SEAL_NTT_NO_ARG ""
+
+void SealNtt_RaiseError(SealNtt_Error error, const char*);
 const char* SealNtt_VerboseErrorCode(SealNtt_Error error);
 const char* SealNtt_VerboseError(void);
 void SealNtt_ClearError(void);

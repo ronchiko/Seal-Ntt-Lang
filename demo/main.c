@@ -13,7 +13,7 @@
 #define FOR_CHECK_TYPE(argv, argc, t) 	\
 		for(int i = 0; i < argc; i++) 	\
 			if(argv[i].type != t)		\
-				{ SealNtt_RaiseError(NTTE_InvalidArgument); return SEAL_NTT_ERROR; }
+				{ SealNtt_RaiseError(NTTE_InvalidArgument, (char*)argv[i].data); return SEAL_NTT_ERROR; }
 
 typedef struct {
 	char *name;
@@ -52,15 +52,15 @@ int PushProperty(char* name, const SealNtt_Object* value, void* object){
 }
 
 int Seal_FuncMakeFile(SealNtt_Object* o, SealNtt_Object argv[], size_t argc){
-	if(argc != 1){
-		SealNtt_RaiseError(NTTE_IllegalArgumentCount);
+	if(argc < 1){
+		SealNtt_RaiseError(NTTE_IllegalArgumentCount, SEAL_NTT_FUNCTION);
 		return SEAL_NTT_ERROR;
 	}
 
 	FOR_CHECK_TYPE(argv, argc, SEAL_NTT_STR);
 
 	char str[350];
-	sprintf(str, "\033[31;1m'%s'\033[0m", argv[0].data);
+	snprintf(str, 350, "\033[31;1m'%s'\033[0m", argv[0].data);
 	o->data = strdup(str);
 	o->type = FileType;
 
@@ -68,8 +68,8 @@ int Seal_FuncMakeFile(SealNtt_Object* o, SealNtt_Object argv[], size_t argc){
 }
 
 int Seal_FuncMakeShader(SealNtt_Object* o, SealNtt_Object argv[], size_t argc){
-	if(argc != 2){
-		SealNtt_RaiseError(NTTE_IllegalArgumentCount);
+	if(argc < 2){
+		SealNtt_RaiseError(NTTE_IllegalArgumentCount, SEAL_NTT_FUNCTION);
 		return SEAL_NTT_ERROR;
 	}
 
@@ -85,8 +85,8 @@ int Seal_FuncMakeShader(SealNtt_Object* o, SealNtt_Object argv[], size_t argc){
 }
 
 int Seal_FuncMakeVector3(SealNtt_Object* o, SealNtt_Object argv[], size_t argc){
-	if(argc != 3){
-		SealNtt_RaiseError(NTTE_IllegalArgumentCount);
+	if(argc < 3){
+		SealNtt_RaiseError(NTTE_IllegalArgumentCount, SEAL_NTT_FUNCTION);
 		return SEAL_NTT_ERROR;
 	}
 	
@@ -107,8 +107,8 @@ int Seal_FuncMakeVector3(SealNtt_Object* o, SealNtt_Object argv[], size_t argc){
 }
 
 int Seal_FuncMakeVector4(SealNtt_Object* o, SealNtt_Object argv[], size_t argc){
-	if(argc != 4){
-		SealNtt_RaiseError(NTTE_IllegalArgumentCount);
+	if(argc < 4){
+		SealNtt_RaiseError(NTTE_IllegalArgumentCount, SEAL_NTT_FUNCTION);
 		return SEAL_NTT_ERROR;
 	}
 	
@@ -167,9 +167,7 @@ int main(int argc, char* argv[]){
 		if(!nttFile){
 			printf(ERR("Couldn't open file '%s'")": %s\n", fileName, strerror(errno));
 			exit(-1);
-		}
-
-		
+		}		
 
 		if(SealNtt_Load(nttFile, &props, &PushProperty) == SEAL_NTT_ERROR){
 			printf(ERR("NTT Parse error")": %s\n", SealNtt_VerboseError());

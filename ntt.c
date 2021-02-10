@@ -7,6 +7,31 @@
 
 #define DELIMS " \n\t"
 
+#define NTT_CALLSTACK_SIZE 200
+#define BASE_FUNC_NAME "<source>"
+
+static struct {
+	char* callstack[NTT_CALLSTACK_SIZE];
+	int used;
+} Ntt_CallStack = {{0}, 0};
+const char* SEAL_NTT_FUNCTION = BASE_FUNC_NAME;
+
+void Ntt_StackPush(char* c){
+	if(Ntt_CallStack.used < NTT_CALLSTACK_SIZE - 1){
+		Ntt_CallStack.used++;
+		SEAL_NTT_FUNCTION = Ntt_CallStack.callstack[Ntt_CallStack.used] = c;
+	}
+}
+
+void Ntt_StackPop(void){
+	if(Ntt_CallStack.used > 0) {
+		Ntt_CallStack.used--;
+		SEAL_NTT_FUNCTION = Ntt_CallStack.callstack[Ntt_CallStack.used];
+	}else{
+		SEAL_NTT_FUNCTION = BASE_FUNC_NAME;
+	}
+}
+
 typedef struct {
 	char* name;
 	SealNtt_Function handler;
@@ -29,6 +54,7 @@ void SealNtt_Cleanup(void){
 	for(int i = 0; i < functionsCount; i++)
 		free(functions[i].name);
 	free(functions);
+	SealNtt_ClearError();
 }
 
 int SealNtt_NewType(void){
@@ -44,7 +70,7 @@ int SealNtt_NewFunc(const char* name, SealNtt_Function handler){
 		}
 	}
 
-	SealNtt_RaiseError(NTTE_TooManyFunctions);
+	SealNtt_RaiseError(NTTE_TooManyFunctions, "");
 	return SEAL_NTT_ERROR;
 }
 
@@ -77,7 +103,7 @@ static TokenNode* Ntt_AdvanceFree(TokenNode* token) {
 static int Ntt_HandleArg(TokenNode** start, Seal_NttHandler handler, void* o, SealNtt_Object* nttl){
 	
 	if(*start == NULL){
-		SealNtt_RaiseError(NTTE_InvalidArgument);
+		SealNtt_RaiseError(NTTE_InvalidArgument, "");
 		return SEAL_NTT_ERROR;
 	}
 	assert(*start != NULL);
@@ -99,10 +125,12 @@ static int Ntt_HandleArg(TokenNode** start, Seal_NttHandler handler, void* o, Se
 		SealNtt_Function fnc = Ntt_GetFunction(token);
 		if(fnc == NULL){
 			result = SEAL_NTT_ERROR;
-			SealNtt_RaiseError(NTTE_IllegalFunctionCall);
+			SealNtt_RaiseError(NTTE_IllegalFunctionCall, token);
 			goto cleanup;
 		}
 		assert(fnc != NULL);
+		Ntt_StackPush(token);
+		
 		size_t argc = 0;
 		SealNtt_Object* argv = NULL;
 		while(*start != NULL){
@@ -113,10 +141,10 @@ static int Ntt_HandleArg(TokenNode** start, Seal_NttHandler handler, void* o, Se
 				goto func_argv_clear;
 			}
 		}
-
 		
 		if(fnc(nttl, argv, argc) == SEAL_NTT_ERROR) result = SEAL_NTT_ERROR;
 func_argv_clear:
+		Ntt_StackPop();
 		for(int i = 0; i < argc; i++)
 			free(argv[i].data);
 		free(argv);
@@ -161,6 +189,8 @@ cleanup:
 int SealNtt_Load(FILE* file, void* o, Seal_NttHandler handler){
 	char* buffer = NULL;
 	size_t size;
+	Ntt_CallStack.used = 0;
+	Ntt_StackPush(BASE_FUNC_NAME);
 	while(1){
 		// Read the line from the stream		
 		if(getline(&buffer, &size, file) == -1){
@@ -207,17 +237,18 @@ int SealNtt_Load(FILE* file, void* o, Seal_NttHandler handler){
 
 		// Read token nodes
 		head = Ntt_AdvanceFree(head);
-		if(head->value[0] != '#'){	// Comment 
+		if(head && head->value[0] != '#'){	// Comment 
 			if(Ntt_HandleProps(&head, handler, o) == -1){
 				free(buffer);
 				return -1;
 			}
 		}
-		while(head) head = Ntt_AdvanceFree(head);	// Make sure to free the heads
+
+		while(head) head = Ntt_AdvanceFree(head);	// Make sure to free the linked list
 		tail = NULL;
 		free(line);
 	}
-
+	Ntt_StackPop();
 	free(buffer);
 	return 0;
 }

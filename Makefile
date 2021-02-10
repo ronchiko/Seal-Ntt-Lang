@@ -8,7 +8,7 @@ LIB_FILES = ntt.c ntte.c nttnum.c
 all: lib clean
 
 # Make using the libaray
-demo-app:
+demo-app: lib clean
 	${CC} demo/main.c /home/ron/dev/Seal-Ntt-Lang/ntt-1.0.so ${CFLAGS} ${INCLUDE_DIR} -o ntt
 
 # Compile the shared library
