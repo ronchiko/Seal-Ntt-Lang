@@ -20,9 +20,9 @@ You can extend and create your own types by embedding the languagge in your own 
 
 ## Compilation
 
-# Unix/Linux
+*Unix/Linux*
 If you would only like to used the library just use `make` on linux.
 If you would to compile the demo, use `make demo`.
 
-In both senarios a file named [ntt-*.*.so] will be created, which is the shared object file.
-If you compile with the `make demo`, the executable is [ntt].
+In both senarios a file named `ntt-*.*.so` will be created, which is the shared object file.
+If you compile with the `make demo`, the executable is `ntt`.
