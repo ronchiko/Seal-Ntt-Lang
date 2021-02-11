@@ -11,6 +11,10 @@
 #define SEAL_NTT_NUM 0
 #define SEAL_NTT_STR 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int SealNtt_Type;
 
 /**
@@ -106,3 +110,7 @@ char* SealNtt_ConcatString(char* buffer, size_t bufferSize, char* extend, size_t
 
 #define SEAL_NTT_SAFE(call) if((call) == SEAL_NTT_ERROR) return SEAL_NTT_ERROR;
 #define SEAL_NTT_ARG_IS(prop, t) (value->type == t && strcmp(property, (prop)) == 0)
+
+#ifdef __cplusplus
+}
+#endif
