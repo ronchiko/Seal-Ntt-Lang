@@ -5,6 +5,8 @@ LIB_FLAGS = -c -fPIC
 INCLUDE_DIR = -I "include"
 LIB_FILES = ntt.c ntte.c nttnum.c
 
+#all:
+	#${CC} demo/main.c ${LIB_FILES} ${CFLAGS} ${INCLUDE_DIR} -o ntt
 all: lib clean
 
 # Make using the libaray

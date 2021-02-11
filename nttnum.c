@@ -2,7 +2,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "ntt.h"
+#include "seal.ntt.h"
 
 #define F_HASX 0x1
 #define F_HASDOT 0x2
@@ -69,4 +69,29 @@ int SealNtt_StringToInt(const char* str, int* i){
 	case NT_Integer: *i = atoi(str); return SEAL_NTT_SUCCESS;
 	default: SealNtt_RaiseError(NTTE_InvalidNumber, str); return SEAL_NTT_ERROR;
 	}
+}
+
+char* SealNtt_ConcatString(char* buffer, size_t bufferSize, char* extend, size_t amount)
+{
+	if(buffer == NULL || extend == NULL) return NULL;
+	
+	char* nBuffer = malloc(bufferSize + amount + 1);
+	char* bPtr = buffer; int i = 0; char *oPtr = nBuffer;
+	while(*bPtr != '\0' && i < bufferSize)
+	{
+		*oPtr = *bPtr;
+		i++; ++bPtr; ++oPtr;
+	}
+	bPtr = extend; i = 0;
+	while(*bPtr != '\0' && i < amount)
+	{
+		*oPtr = *bPtr;
+		i++; ++bPtr; ++oPtr;
+	}
+	*oPtr = '\0';
+	
+
+	free(buffer);
+
+	return nBuffer;
 }
